@@ -4,19 +4,32 @@ Answer each question in 3 to 5 sentences. Be specific and honest about what actu
 
 ## 1. What was broken when you started?
 
-- What did the game look like the first time you ran it?
-- List at least two concrete bugs you noticed at the start  
-  (for example: "the hints were backwards").
+### Bug 1: Wrong hint on even-numbered attempts
+- **Input/trigger:** Secret was 40. I guessed 60, then 9, then 9 again.
+- **Expected:** A guess of 9 should always say to go HIGHER.
+- **Actual:** On attempt 4 the game said "Go LOWER!" for a guess of 9.
+- **Suspected cause:** In `app.py`, on even attempts the secret is converted with
+  `str(...)`, so the comparison happens on text ("9" > "40") instead of numbers.
 
-**Bug Reproduction Log**
+### Bug 2: Attempt counter starts at 1
+- **Input/trigger:** Opened the app and made no guesses.
+- **Expected:** Attempts: 0 and "Attempts left: 8" on Normal.
+- **Actual:** Debug panel showed Attempts: 1 and the info box said "Attempts left: 7".
+- **Suspected cause:** `st.session_state.attempts = 1` in `app.py`.
 
-Document at least 3 bugs you found. Add rows as needed.
+### Bug 3: Score goes up on wrong guesses
+- **Input/trigger:** Three wrong guesses (60, 9, 9) against secret 40.
+- **Expected:** Score stays at 0 or goes down.
+- **Actual:** Score was 5.
+- **Suspected cause:** `update_score` in `app.py` adds +5 for "Too High" on even attempts.
 
-| Input | Expected Behavior | Actual Behavior | Console Output / Error |
-|-------|-------------------|-----------------|------------------------|
-| | | | |
-| | | | |
-| | | | |
+### Bug Reproduction Logs
+
+| Input Used | Expected Behavior | Actual Behavior | Console Error / Output | Suspected Code Location |
+|---|---|---|---|---|
+| Secret 40, guess 9 on attempt 4 | "Go HIGHER" | "Go LOWER" | none | `app.py`, `secret = str(...)` on even attempts; `check_guess` |
+| Fresh game, no guesses | Attempts 0, 8 left | Attempts 1, 7 left | none | `app.py`, `st.session_state.attempts = 1` |
+| Wrong guesses 60, 9, 9 vs secret 40 | Score ≤ 0 | Score 5 | none | `app.py`, `update_score` |
 
 ---
 

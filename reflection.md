@@ -35,30 +35,26 @@ Answer each question in 3 to 5 sentences. Be specific and honest about what actu
 
 ## 2. How did you use AI as a teammate?
 
-- Which AI tools did you use on this project (for example: ChatGPT, Gemini, Copilot)?
-- Give one example of an AI suggestion that was correct (including what the AI suggested and how you verified the result).
-- Give one example of an AI suggestion you did not accept as written (including what the AI suggested, why you rejected or changed it, and how you verified your version). It does not have to be a suggestion that was wrong: over-engineered, out of scope, harder to read, or a poor fit for this codebase all count.
+**Tools used:** I used Claude in the web chat to understand the code and plan the fixes. I also had the VS Code chat panel open but mainly worked from Claude's explanations.
+
+**A correct suggestion:** Claude pointed out that `app.py` converts the secret to a string on even-numbered attempts (`secret = str(st.session_state.secret)`), so Python was comparing numbers as text. That explained why the same guess could give opposite hints. I verified it by guessing 9 four times in a row against a secret of 39 and getting the same hint every time after the fix, and I added a pytest case (`check_guess(9, 50)` must be "Too Low") that would fail with string comparison.
+
+**A suggestion I did not accept as written:** Early on, Claude predicted what hints the buggy game would show for certain guesses, but my real results didn't match that prediction exactly. Instead of trusting it, I reproduced the bug myself, recorded what I actually saw (a guess of 9 gave "Go LOWER!" on attempt 4), and wrote that in my bug log. I also chose to fix only the bugs I could verify and left the scoring bug in `update_score` alone rather than rewriting more code than the task required.
 
 ---
 
 ## 3. Debugging and testing your fixes
 
-- How did you decide whether a bug was really fixed?
-- Describe at least one test you ran (manual or using pytest)  
-  and what it showed you about your code.
-- Did AI help you design or understand any tests? How?
+I decided a bug was fixed only when it passed both a test and a manual check. For the hint bug, I ran the live game and submitted 9 repeatedly against a secret of 39, and it said "Go HIGHER" on both odd and even attempts, which is where it used to change. I also ran pytest with four tests (too high, too low, win, and a numeric-vs-string comparison) and got `4 passed`. Plain `pytest` first failed with `ModuleNotFoundError: No module named 'logic_utils'`, and running `python -m pytest` fixed it because it adds the project folder to Python's path. Claude helped me design the tests by suggesting the "9 vs 50" case, which targets the exact string-comparison bug I fixed. The scoring in `update_score` still rewards some wrong guesses, so I know it isn't fully fixed.
 
 ---
 
 ## 4. What did you learn about Streamlit and state?
 
-- How would you explain Streamlit "reruns" and session state to a friend who has never used Streamlit?
+Streamlit reruns the whole Python script from top to bottom every time you click a button or type something. Normal variables get reset on every rerun, so a secret number created with `random.randint` would change each time. `st.session_state` is like a small notebook that survives between reruns, so I store the secret, attempts, score, and history there and only create them if they aren't already there (`if "secret" not in st.session_state`). That's why the game remembers my guesses even though the script restarts after each click.
 
 ---
 
 ## 5. Looking ahead: your developer habits
 
-- What is one habit or strategy from this project that you want to reuse in future labs or projects?
-  - This could be a testing habit, a prompting strategy, or a way you used Git.
-- What is one thing you would do differently next time you work with AI on a coding task?
-- In one or two sentences, describe how this project changed the way you think about AI generated code.
+One habit I want to reuse is reproducing a bug and writing down the exact input, expected result, and actual result before asking AI for a fix. That made it easy to tell whether a fix really worked. Next time I would write the pytest test first, before changing the code, so I can see it fail and then pass. This project changed how I think about AI-generated code: it can look clean and still hide logic mistakes, so I now treat it as a draft that I have to test and verify myself.

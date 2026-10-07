@@ -25,28 +25,46 @@ It wrote the code, ran away, and now the game is unplayable.
 
 ## 📝 Document Your Experience
 
-- [ ] Describe the game's purpose.
-- [ ] Detail which bugs you found.
-- [ ] Explain what fixes you applied.
+## 📝 Document Your Experience
+
+**Game purpose:** A number-guessing game built with Streamlit. The player picks a difficulty, guesses a secret number, and gets "Go HIGHER" or "Go LOWER" hints until they win or run out of attempts.
+
+**Bugs found:**
+- On even-numbered attempts the secret was converted to a string, so numbers were compared as text (`"9" > "40"`) and hints were wrong. The same guess could give opposite hints on different attempts.
+- The attempt counter started at 1 instead of 0, so "Attempts left" was off by one.
+- The "Guess a number between 1 and 100" message was hardcoded and wrong for Easy and Hard.
+- Score went up on some wrong guesses (known issue, not fixed).
+
+**Fixes applied:**
+- Moved `get_range_for_difficulty`, `parse_guess`, `check_guess`, and `update_score` from `app.py` into `logic_utils.py`.
+- `check_guess` now always compares two integers and returns the correct hint.
+- Removed the even-attempt `str(secret)` conversion in `app.py`.
+- Set the initial attempts value to 0.
+- The info message now uses the real `low` and `high` range.
+- Added pytest tests in `tests/test_game_logic.py`.
+
 
 ## 📸 Demo Walkthrough
 
-Describe your fixed game in numbered steps so a reader can follow along without watching a video:
+1. Start a Normal game: Attempts left shows 8 and the debug panel shows Attempts 0.
+2. Secret is 39. I enter 9 → "📈 Go HIGHER!"
+3. I enter 9 three more times → "Go HIGHER" every time (before the fix the hint flipped on even attempts).
+4. I enter 80 → "📉 Go LOWER!"
+5. I enter 39 → "🎉 Correct!", balloons appear, and "You won! The secret was 39. Final score: 5" is shown.
 
-1. <!-- Describe this step -->
-2. <!-- Describe this step -->
-3. <!-- Describe this step -->
-4. <!-- Describe this step -->
-5. <!-- Add more steps as needed -->
-
-**Screenshot** *(optional)*: <!-- Insert a screenshot of your fixed, winning game here -->
 
 ## 🧪 Test Results
 
 ```
-# Paste your pytest output here, e.g.:
-# pytest tests/
-# ========================= X passed in 0.XXs =========================
+============================= test session starts ==============================
+platform darwin -- Python 3.13.15, pytest-9.1.1, pluggy-1.6.0
+rootdir: /Users/riteshverma/ai110-module1show-gameglitchinvestigator-starter
+plugins: anyio-4.15.1
+collected 4 items
+
+tests/test_game_logic.py ....                                            [100%]
+
+============================== 4 passed in 0.02s ===============================
 ```
 
 ## 🚀 Stretch Features
